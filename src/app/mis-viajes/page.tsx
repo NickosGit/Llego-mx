@@ -30,7 +30,7 @@ export default async function MisViajes() {
       ) : (
         <>
           <p className="mt-3 text-2xl font-bold">
-            Sentado: {seatedCount} de tus {data.length} viajes
+            Sentado: {seatedCount} de {data.length === 1 ? "tu 1 viaje" : `tus ${data.length} viajes`}
           </p>
           <ul className="mt-4 space-y-3">
             {data.map((trip) => (

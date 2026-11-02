@@ -48,16 +48,14 @@ export function TripForm({ today, usualDepart }: { today: Dia; usualDepart: stri
           </div>
         )}
         <p role="status" className="mt-6 text-3xl font-black leading-tight">
-          Tu viaje cuenta. Esta franja ahora tiene {state.success.n} viajes.
+          Tu viaje cuenta. Esta franja ahora tiene {state.success.n}{" "}
+          {state.success.n === 1 ? "viaje" : "viajes"}.
         </p>
         <Link
           href="/mis-viajes"
           className="mt-6 block rounded-2xl border-2 border-[#141414] px-4 py-3 text-center text-xl font-bold"
         >
           Ver mis viajes
-        </Link>
-        <Link href="/" className="mt-4 inline-block py-2 text-lg font-semibold underline">
-          Volver al inicio
         </Link>
       </>
     );
