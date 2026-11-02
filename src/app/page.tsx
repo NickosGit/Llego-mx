@@ -5,6 +5,7 @@ import { corridor } from "@/config/corridor";
 import { getForecastCell, type ForecastCell } from "@/lib/forecast";
 import { dayTypeOf, parsePlanInputs } from "@/lib/planInputs";
 import { earlierSlots, formatClock, planSeat, type Plan } from "@/lib/planSeat";
+import { getCurrentUser } from "@/lib/supabase/server";
 
 function SeatChance({ outOf10 }: { outOf10: number }) {
   return (
@@ -70,6 +71,8 @@ export default async function Home({
       slots.map(async (slot) => [slot, await getForecastCell(dayType, slot)] as const),
     ),
   );
+
+  const user = await getCurrentUser();
 
   const plan = planSeat({
     arriveBy: inputs.llegar,
@@ -140,7 +143,9 @@ export default async function Home({
           className="mt-auto block rounded-2xl border-2 border-[#141414] px-4 py-3 text-center"
         >
           <span className="block text-xl font-bold">Registrar mi viaje en la 120</span>
-          <span className="block text-sm text-neutral-600">Necesitas entrar con Google</span>
+          {!user && (
+            <span className="block text-sm text-neutral-600">Necesitas entrar con Google</span>
+          )}
         </Link>
       </main>
     </div>

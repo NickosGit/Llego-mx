@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
+import { AccountBar } from "@/components/AccountBar";
 import "./globals.css";
 
 const inter = Inter({
@@ -24,7 +25,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es-MX" className={inter.variable}>
-      <body className="antialiased">{children}</body>
+      <body className="antialiased">
+        <AccountBar />
+        {children}
+      </body>
     </html>
   );
 }

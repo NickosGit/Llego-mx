@@ -27,13 +27,12 @@ function quarterHours(from: string, to: string): string[] {
 export const ARRIVE_OPTIONS = quarterHours("05:00", "12:00");
 export const DEPART_OPTIONS = quarterHours("03:00", "11:45");
 
-// Today + 1 in Mexico City, which has had no daylight saving since 2022.
-export function tomorrowDia(now: Date): Dia {
-  const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+// The weekday in Mexico City, which has had no daylight saving since 2022.
+export function todayDia(now: Date): Dia {
   const weekday = new Intl.DateTimeFormat("en-US", {
     timeZone: "America/Mexico_City",
     weekday: "short",
-  }).format(tomorrow);
+  }).format(now);
   const byWeekday: Record<string, Dia> = {
     Mon: "lunes",
     Tue: "martes",
@@ -44,6 +43,10 @@ export function tomorrowDia(now: Date): Dia {
     Sun: "domingo",
   };
   return byWeekday[weekday];
+}
+
+export function tomorrowDia(now: Date): Dia {
+  return todayDia(new Date(now.getTime() + 24 * 60 * 60 * 1000));
 }
 
 export function dayTypeOf(dia: Dia): DayType {

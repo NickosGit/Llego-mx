@@ -38,6 +38,14 @@
 - **`/registrar` is a placeholder** until commit 4, so the home button doesn't lead to a 404.
 - **Deploy #2 first failed with HTTP 500.** The build ran before the env vars existed, and `NEXT_PUBLIC_*` values are inlined at build time. Vercel's log: "Your project's URL and Key are required". Saving the vars isn't enough: a new build has to follow.
 
+### Auth and ride logging (commit 4)
+- **Sign-in screen says why before asking:** the persona closes anything that asks for an account without saying what for. The forecast stays public.
+- **`next` only accepts `/registrar` or `/mis-viajes`,** so a crafted link can't send anyone off-site after sign-in.
+- **Blank minutes are rejected, not read as 0.** `z.coerce.number()` alone turns "" into 0, which would log a false "no line" ride.
+- **The form uses `noValidate`** so errors come from zod, inline and in Spanish, instead of the browser's tooltip.
+- **Borrar takes two taps** (not in the prompt): a delete can't be undone and this gets used one-handed on a bus.
+- **The success screen shows the banner** when its count includes simulated rows (hard rule 6).
+
 ## Not now
 - Metro legs (seat or time).
 - Return trip.
@@ -46,7 +54,9 @@
 ## Open
 - [ ] Ratify the pivot with Team 4.
 - [ ] Rodolfo: week A logs (at 4:45), then week B (at the suggested time).
+- [ ] Publish the Google consent screen or add Rodolfo as a test user. While it's in Testing, Google blocks anyone not on the list.
+- [ ] Local Google sign-in lands on production instead of `localhost:4000`: Supabase isn't accepting the localhost redirect yet. Production works, so testing runs there for now.
 - [ ] Default day is "tomorrow", per the PACKET. Opened on Friday or Saturday it lands on Sin dato, and at 4 am on a workday it shows the next day. Decide whether to keep it.
 
 ## Tomorrow's first move
-Run commit 4: enable Google sign-in in Supabase, then build `/registrar` and `/mis-viajes`.
+Run commit 5: the 10 checks in PACKET §12, written to `docs/TEST_LOG.md`, including RLS with two accounts.
