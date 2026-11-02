@@ -30,6 +30,13 @@
 - **Do not run `schema.sql` or `seed.sql` on the shared Supabase project.** It already has a Week 7 `trips` table with a different schema: `create table if not exists` would skip it, and the seed's `delete ... where is_simulated` would erase Week 7's simulated rows.
 - **The secrets grep runs with `-- ":!docs"`.** Run literally, it always matches `docs/PACKET.md` and `docs/IMPLEMENTATION_PROMPT.md`, which quote the pattern itself. Those two lines are the only matches.
 
+### Seat plan (commit 3)
+- **`ya_sentado` copy follows the prompt:** "A tu hora ya sueles ir sentado: X de cada 10." PACKET §12 words it differently; the meaning is the same.
+- **`sin_sugerencia` shows only the honest message,** per the prompt. PACKET §5a's "show best one found" is not built, so no slot that fails the goal looks recommended.
+- **`hasSimulated` covers every cell the plan read,** including slots it searched and rejected, because they shaped the answer.
+- **A bad query param falls back to its default** instead of breaking the screen.
+- **`/registrar` is a placeholder** until commit 4, so the home button doesn't lead to a 404.
+
 ## Not now
 - Metro legs (seat or time).
 - Return trip.
@@ -38,6 +45,7 @@
 ## Open
 - [ ] Ratify the pivot with Team 4.
 - [ ] Rodolfo: week A logs (at 4:45), then week B (at the suggested time).
+- [ ] Default day is "tomorrow", per the PACKET. Opened on Friday or Saturday it lands on Sin dato, and at 4 am on a workday it shows the next day. Decide whether to keep it.
 
 ## Tomorrow's first move
-Run commit 3: `planSeat.ts`, its unit tests, and the home screen from the mockup. Deploy #2 needs both Supabase env vars in Vercel.
+Run commit 4: enable Google sign-in in Supabase, then build `/registrar` and `/mis-viajes`.
