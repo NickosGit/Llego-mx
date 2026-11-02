@@ -25,6 +25,8 @@
 - **New folder and repo, `llego-mx`.** `llego.vercel.app` belongs to an unrelated site, so the PACKET's fallback `llego-mx.vercel.app` applies. The Week 7 app stays untouched: its repo `NickosGit/Llego`, its Vercel project `llego` and `llego-sigma.vercel.app`.
 - **Next.js 15, per the prompt.** The Week 7 app is on Next 16, so route protection here uses `middleware.ts`, not `proxy.ts`.
 - **Deploy #1 live:** https://llego-mx.vercel.app, from `NickosGit/Llego-mx`, Vercel project `llego-mx`. No env vars yet: nothing reads Supabase. Checked at 360px on production.
+- **Own Supabase project:** `llego-mx`, ref `ftfjqdjsthsakqqmjivk`, in its own organization. `schema.sql` and `seed.sql` are applied. `forecast_slot` returns the prompt's table for all four slots, sábado and domingo return n = 0, and the anon client gets 0 rows from `trips`.
+- **Anon key is Supabase's publishable key** (`sb_publishable_...`), stored under the env var name the prompt requires.
 - **Do not run `schema.sql` or `seed.sql` on the shared Supabase project.** It already has a Week 7 `trips` table with a different schema: `create table if not exists` would skip it, and the seed's `delete ... where is_simulated` would erase Week 7's simulated rows.
 - **The secrets grep runs with `-- ":!docs"`.** Run literally, it always matches `docs/PACKET.md` and `docs/IMPLEMENTATION_PROMPT.md`, which quote the pattern itself. Those two lines are the only matches.
 
@@ -36,7 +38,6 @@
 ## Open
 - [ ] Ratify the pivot with Team 4.
 - [ ] Rodolfo: week A logs (at 4:45), then week B (at the suggested time).
-- [ ] Choose a Supabase project for this build (see "Where this build lives").
 
 ## Tomorrow's first move
-Create a separate Supabase project for this build, then run commit 2.
+Run commit 3: `planSeat.ts`, its unit tests, and the home screen from the mockup. Deploy #2 needs both Supabase env vars in Vercel.
