@@ -56,7 +56,7 @@
 - [ ] Rodolfo: week A logs (at 4:45), then week B (at the suggested time).
 - [ ] Ask Rodolfo how long he takes from home to the stop. His baseline's 4:45 is leaving home, but slots mean reaching the stop, so his true default slot may be later (see `docs/PERSONA_LOG.md`).
 - [ ] Persona test confusions still open: why the data is simulated (#1), the 06:00 message (#4), and the trade line reading as certain (#5).
-- [ ] Publish the Google consent screen or add Rodolfo as a test user. While it's in Testing, Google blocks anyone not on the list.
+- [ ] Add Rodolfo as a test user on the Google consent screen. The `llego-mx` client lives in the Google Cloud project "Sello", in Testing, where Google blocks anyone not on the list. Publishing would need a homepage and a privacy policy page, so it stays in Testing. Check which app name he sees at sign-in; changing it there also affects Sello.
 - [ ] Local Google sign-in lands on production instead of `localhost:4000`: Supabase isn't accepting the localhost redirect yet. Production works, so testing runs there for now.
 - [ ] Default day is "tomorrow", per the PACKET. Opened on Friday or Saturday it lands on Sin dato, and at 4 am on a workday it shows the next day. Decide whether to keep it.
 
