@@ -36,6 +36,7 @@
 - **`hasSimulated` covers every cell the plan read,** including slots it searched and rejected, because they shaped the answer.
 - **A bad query param falls back to its default** instead of breaking the screen.
 - **`/registrar` is a placeholder** until commit 4, so the home button doesn't lead to a 404.
+- **Deploy #2 first failed with HTTP 500.** The build ran before the env vars existed, and `NEXT_PUBLIC_*` values are inlined at build time. Vercel's log: "Your project's URL and Key are required". Saving the vars isn't enough: a new build has to follow.
 
 ## Not now
 - Metro legs (seat or time).
