@@ -23,6 +23,7 @@ function SuggestionCard({ suggestion }: { suggestion: NonNullable<Plan["suggesti
         sal a las
         <span className="text-6xl font-black tracking-tight">{formatClock(suggestion.slot)}</span>
       </p>
+      <p className="mt-1 text-base font-semibold">Hora de estar en la parada</p>
       <p className="mt-2 text-lg">
         <SeatChance outOf10={suggestion.seatOutOf10} />
       </p>
@@ -92,6 +93,9 @@ export default async function Home({
         </p>
 
         <PlanInputs {...inputs} />
+        <p className="mt-2 text-sm font-semibold text-neutral-700">
+          Las horas de salida son de cuando ya estás en la parada de la 120, no de tu casa.
+        </p>
 
         {plan.state === "sin_dato" && (
           <MessageCard>

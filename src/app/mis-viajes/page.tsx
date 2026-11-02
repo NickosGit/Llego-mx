@@ -43,7 +43,8 @@ export default async function MisViajes() {
                     {dateFormat.format(new Date(trip.created_at))}
                   </p>
                   <p className="text-lg font-bold">
-                    {formatClock(trip.depart_slot.slice(0, 5))} · {trip.seated ? "Sentado" : "Parado"}
+                    {formatClock(trip.depart_slot.slice(0, 5))} en la parada ·{" "}
+                    {trip.seated ? "Sentado" : "Parado"}
                   </p>
                   <p className="text-base">
                     Fila {trip.wait_min} min · arriba {trip.ride_min} min
