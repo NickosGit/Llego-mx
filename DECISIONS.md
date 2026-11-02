@@ -59,4 +59,4 @@
 - [ ] Default day is "tomorrow", per the PACKET. Opened on Friday or Saturday it lands on Sin dato, and at 4 am on a workday it shows the next day. Decide whether to keep it.
 
 ## Tomorrow's first move
-Run commit 5: the 10 checks in PACKET §12, written to `docs/TEST_LOG.md`, including RLS with two accounts.
+Run commit 6: the persona test from PACKET §12, logged in `docs/PERSONA_LOG.md`, and fix the worst confusion.
