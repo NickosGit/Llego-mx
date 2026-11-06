@@ -49,6 +49,25 @@ export function tomorrowDia(now: Date): Dia {
   return todayDia(new Date(now.getTime() + 24 * 60 * 60 * 1000));
 }
 
+function hourInMexicoCity(now: Date): number {
+  return Number(
+    new Intl.DateTimeFormat("en-US", {
+      timeZone: "America/Mexico_City",
+      hour: "numeric",
+      hourCycle: "h23",
+    }).format(now),
+  );
+}
+
+// Before 10:00 the rider is planning today (or is already in line); later, tomorrow.
+// A weekend lands on lunes: weekends have no data, and an empty screen ends a user session.
+export function defaultDia(now: Date): Dia {
+  const dia = hourInMexicoCity(now) < 10 ? todayDia(now) : tomorrowDia(now);
+  return dia === "sabado" || dia === "domingo" ? "lunes" : dia;
+}
+
+export const EARLIER_OPTIONS = corridor.earlierOptions.map(String);
+
 export function dayTypeOf(dia: Dia): DayType {
   return DIAS.find((d) => d.value === dia)!.dayType;
 }
@@ -65,7 +84,8 @@ export function parsePlanInputs(
     .object({
       llegar: oneOf(ARRIVE_OPTIONS, corridor.defaults.arriveBy),
       sales: oneOf(DEPART_OPTIONS, corridor.defaults.usualDepart),
-      dia: z.enum(DIAS.map((d) => d.value) as [Dia, ...Dia[]]).catch(tomorrowDia(now)),
+      dia: z.enum(DIAS.map((d) => d.value) as [Dia, ...Dia[]]).catch(defaultDia(now)),
+      antes: oneOf(EARLIER_OPTIONS, "0"),
     })
     .parse(params);
 }

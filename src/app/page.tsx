@@ -4,7 +4,7 @@ import { SimulatedBanner } from "@/components/SimulatedBanner";
 import { corridor } from "@/config/corridor";
 import { getForecastCell, type ForecastCell } from "@/lib/forecast";
 import { dayTypeOf, parsePlanInputs } from "@/lib/planInputs";
-import { earlierSlots, formatClock, planSeat, type Plan } from "@/lib/planSeat";
+import { earlierSlots, formatClock, planSeat, searchWindow, type Plan } from "@/lib/planSeat";
 import { getCurrentUser } from "@/lib/supabase/server";
 
 function SeatChance({ outOf10 }: { outOf10: number }) {
@@ -46,6 +46,7 @@ function UsualCard({ usual }: { usual: NonNullable<Plan["usual"]> }) {
       <p className="mt-0.5 text-base">
         Fila típica {usual.p50_wait} min · llegas ~{usual.arrival}
       </p>
+      <p className="mt-0.5 text-base font-semibold">Día malo: llegas ~{usual.badDayArrival}</p>
     </section>
   );
 }
@@ -65,8 +66,9 @@ export default async function Home({
 }) {
   const inputs = parsePlanInputs(await searchParams, new Date());
   const dayType = dayTypeOf(inputs.dia);
+  const maxEarlierMin = searchWindow(Number(inputs.antes), corridor);
 
-  const slots = [inputs.sales, ...earlierSlots(inputs.sales, corridor.searchWindowMin)];
+  const slots = [inputs.sales, ...earlierSlots(inputs.sales, maxEarlierMin)];
   const cells = new Map<string, ForecastCell>(
     await Promise.all(
       slots.map(async (slot) => [slot, await getForecastCell(dayType, slot)] as const),
@@ -78,6 +80,7 @@ export default async function Home({
   const plan = planSeat({
     arriveBy: inputs.llegar,
     usualDepart: inputs.sales,
+    maxEarlierMin,
     dayType,
     config: corridor,
     forecast: (_day, slot) => cells.get(slot)!,
@@ -88,6 +91,9 @@ export default async function Home({
       {plan.hasSimulated && <SimulatedBanner />}
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col px-5 pt-6 pb-5">
         <h1 className="text-5xl font-black tracking-tight">¿Llego?</h1>
+        <p className="mt-2 text-xl font-semibold leading-snug">
+          ¿A qué hora llegas a la parada para irte sentado en la 120 y seguir llegando a tiempo?
+        </p>
         <p className="mt-1 text-base text-neutral-600">
           {corridor.route} · Las Alamedas → El Rosario
         </p>
@@ -107,10 +113,16 @@ export default async function Home({
             A tu hora ya sueles ir sentado: {plan.usual.seatOutOf10} de cada 10.
           </MessageCard>
         )}
-        {plan.state === "sin_sugerencia" && (
+        {plan.state === "sin_sugerencia" && maxEarlierMin === 0 && (
           <MessageCard>
-            No encontramos una hora, hasta 1 h antes, en la que la mayoría de las veces se vaya
-            sentado.
+            Sin llegar antes a la parada, no hay forma de irte sentado más seguido. No te vamos a
+            pedir que duermas menos: si algún día sí puedes, dinos cuánto arriba.
+          </MessageCard>
+        )}
+        {plan.state === "sin_sugerencia" && maxEarlierMin > 0 && (
+          <MessageCard>
+            Llegando hasta {maxEarlierMin} min antes, no hay una hora en la que la mayoría de las
+            veces se vaya sentado y llegues a tiempo en un día malo.
           </MessageCard>
         )}
         {plan.suggestion && <SuggestionCard suggestion={plan.suggestion} />}

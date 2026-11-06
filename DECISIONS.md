@@ -46,6 +46,21 @@
 - **Borrar takes two taps** (not in the prompt): a delete can't be undone and this gets used one-handed on a bus.
 - **The success screen shows the banner** when its count includes simulated rows (hard rule 6).
 
+## Week 13 — real users (Layer 2)
+
+### Pain #1: the app asked Rodolfo for something he can't do (6 Nov 2026)
+- **Evidence, from Rodolfo via Nico (WhatsApp, before his session):** he sleeps at 22:00 and wakes at 4:15. Leaving earlier "would mean sleeping 3–4 hours" (his feeling; the real cost of 15 min earlier is 6 h 15 → 6 h). He can't let a full 120 go and take the next one because he'd be late for work.
+- **So his Week 12 "yes, I'd leave 15 min earlier" did not survive two follow-up questions.** Both seat levers are closed for him: earlier costs sleep, skipping a bus costs punctuality. This is the threat to the 10:1, so it is pain #1, not a UI confusion.
+- **Fix: the rider sets the limit, the app never assumes it.** New input "¿Puedes llegar antes a la parada?" (`antes`: 0/15/30/45/60, **default 0**). The search only goes as far back as the rider allows, still capped at 1 h. With 0 the app says plainly it won't ask them to sleep less, and still shows what it knows.
+- **The usual card now shows the bad-day arrival** (p90, rounded up, never shown better than it is). For Rodolfo at 4:45 on the seed that is ~7:00: zero slack, which is his real situation.
+- **Default day is a weekday.** Before 10:00 it's today, after that tomorrow, and a weekend lands on lunes. Friday's "tomorrow = sábado = Sin dato" emptied the first screen, which ends a user session.
+- **The question is now visible at the top.** Before, "sentado" was only in the meta description; a stranger opening the link didn't know what the app promised.
+- **Before/after:** production before the merge shows "sal a las 4:30" for 04:45 lunes; the branch preview shows the 0-minute default with no suggestion. Screenshot both.
+
+### Testing logistics
+- **Google sign-in is still in Testing.** Strangers can see the forecast (public) but can't log rides unless their Gmail is added as a test user. Add each tester before their session, or use a message as the "would come back" proof.
+- **Two rides dated 6 Nov in Nico's account** (4:45 and 5:00, both seated). If they were tests, delete them: they're counted in the public forecast and are not flagged simulated.
+
 ## Not now
 - Metro legs (seat or time).
 - Return trip.
@@ -58,7 +73,8 @@
 - [ ] Persona test confusions still open: why the data is simulated (#1), the 06:00 message (#4), and the trade line reading as certain (#5).
 - [ ] Add Rodolfo as a test user on the Google consent screen. The `llego-mx` client lives in the Google Cloud project "Sello", in Testing, where Google blocks anyone not on the list. Publishing would need a homepage and a privacy policy page, so it stays in Testing. Check which app name he sees at sign-in; changing it there also affects Sello.
 - [ ] Local Google sign-in lands on production instead of `localhost:4000`: Supabase isn't accepting the localhost redirect yet. Production works, so testing runs there for now.
-- [ ] Default day is "tomorrow", per the PACKET. Opened on Friday or Saturday it lands on Sin dato, and at 4 am on a workday it shows the next day. Decide whether to keep it.
+- [x] Default day: fixed in Week 13 (weekday default, today before 10:00).
+- [ ] Week 13: 5 sessions (Rodolfo + 4, at least 3 strangers), pain ranking, one user who comes back.
 
 ## Tomorrow's first move
-Ratify the pivot with Team 4, make the Google sign-in available to Rodolfo, and ask him for his home-to-stop time before week A starts.
+Screenshot production (before), check the branch preview (after), merge, then run Rodolfo's session on the new version. Add each tester's Gmail to the Google test users first.

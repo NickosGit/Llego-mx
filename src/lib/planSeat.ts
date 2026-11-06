@@ -8,6 +8,7 @@ export type UsualSlot = {
   seatOutOf10: number;
   p50_wait: number;
   arrival: string;
+  badDayArrival: string; // p90, rounded UP so a bad day is never shown better than it is
   onTime: boolean;
   n: number;
 };
@@ -34,6 +35,8 @@ export type Plan = {
 type PlanInput = {
   arriveBy: string;
   usualDepart: string;
+  // How much earlier the rider says they can be at the stop. 0 = never ask them to sleep less.
+  maxEarlierMin: number;
   dayType: DayType;
   config: typeof corridor;
   forecast: (dayType: DayType, slot: string) => ForecastCell;
@@ -68,6 +71,10 @@ function round5(minutes: number): number {
   return Math.round(minutes / 5) * 5;
 }
 
+function ceil5(minutes: number): number {
+  return Math.ceil(minutes / 5) * 5;
+}
+
 function hasData(cell: ForecastCell): cell is CellWithData {
   return cell.n >= MIN_RIDES && cell.seat_rate !== null;
 }
@@ -86,7 +93,19 @@ function labelFor(n: number): Plan["label"] {
   return { text: n >= 30 ? "Buen dato" : "Poco dato", n };
 }
 
-export function planSeat({ arriveBy, usualDepart, dayType, config, forecast }: PlanInput): Plan {
+// The rider's own limit wins, and it can never go past the corridor's hard cap.
+export function searchWindow(maxEarlierMin: number, config: typeof corridor): number {
+  return Math.max(0, Math.min(maxEarlierMin, config.searchWindowMin));
+}
+
+export function planSeat({
+  arriveBy,
+  usualDepart,
+  maxEarlierMin,
+  dayType,
+  config,
+  forecast,
+}: PlanInput): Plan {
   const target = toMinutes(arriveBy) - config.restOfTripMin; // must reach El Rosario by this
   const onTime = (slot: string, c: CellWithData) => toMinutes(slot) + c.p90_total <= target;
   const arrival = (slot: string, c: CellWithData) =>
@@ -111,6 +130,9 @@ export function planSeat({ arriveBy, usualDepart, dayType, config, forecast }: P
     seatOutOf10: seatOutOf10(usualCell),
     p50_wait: usualCell.p50_wait,
     arrival: arrival(usualDepart, usualCell),
+    badDayArrival: formatClock(
+      toSlot(ceil5(toMinutes(usualDepart) + usualCell.p90_total + config.restOfTripMin)),
+    ),
     onTime: usualOnTime,
     n: usualCell.n,
   };
@@ -128,7 +150,7 @@ export function planSeat({ arriveBy, usualDepart, dayType, config, forecast }: P
   }
 
   let hasSimulated = usualCell.has_simulated;
-  for (const slot of earlierSlots(usualDepart, config.searchWindowMin)) {
+  for (const slot of earlierSlots(usualDepart, searchWindow(maxEarlierMin, config))) {
     const cell = forecast(dayType, slot);
     hasSimulated ||= cell.has_simulated;
     if (hasData(cell) && cell.seat_rate >= config.seatGoal && onTime(slot, cell)) {

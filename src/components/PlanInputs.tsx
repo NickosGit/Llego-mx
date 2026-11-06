@@ -2,9 +2,9 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { ARRIVE_OPTIONS, DEPART_OPTIONS, DIAS, type Dia } from "@/lib/planInputs";
+import { ARRIVE_OPTIONS, DEPART_OPTIONS, DIAS, EARLIER_OPTIONS, type Dia } from "@/lib/planInputs";
 
-type Values = { llegar: string; sales: string; dia: Dia };
+type Values = { llegar: string; sales: string; dia: Dia; antes: string };
 
 function Field({
   label,
@@ -49,46 +49,59 @@ export function PlanInputs(initial: Values) {
   }
 
   return (
-    <div
-      aria-busy={isPending}
-      className={`mt-5 grid grid-cols-[1fr_1fr_1.2fr] gap-2 ${isPending ? "opacity-60" : ""}`}
-    >
-      <Field
-        label="Llegar"
-        value={values.llegar}
-        onChange={(llegar) => update({ llegar })}
-        valueClassName="text-xl"
-      >
-        {ARRIVE_OPTIONS.map((t) => (
-          <option key={t} value={t}>
-            {t}
-          </option>
-        ))}
-      </Field>
-      <Field
-        label="Sueles salir"
-        value={values.sales}
-        onChange={(sales) => update({ sales })}
-        valueClassName="text-xl"
-      >
-        {DEPART_OPTIONS.map((t) => (
-          <option key={t} value={t}>
-            {t}
-          </option>
-        ))}
-      </Field>
-      <Field
-        label="Día"
-        value={values.dia}
-        onChange={(dia) => update({ dia: dia as Dia })}
-        valueClassName="text-lg leading-7"
-      >
-        {DIAS.map((d) => (
-          <option key={d.value} value={d.value}>
-            {d.label}
-          </option>
-        ))}
-      </Field>
+    <div aria-busy={isPending} className={`mt-5 ${isPending ? "opacity-60" : ""}`}>
+      <div className="grid grid-cols-[1fr_1fr_1.2fr] gap-2">
+        <Field
+          label="Llegar"
+          value={values.llegar}
+          onChange={(llegar) => update({ llegar })}
+          valueClassName="text-xl"
+        >
+          {ARRIVE_OPTIONS.map((t) => (
+            <option key={t} value={t}>
+              {t}
+            </option>
+          ))}
+        </Field>
+        <Field
+          label="Sueles salir"
+          value={values.sales}
+          onChange={(sales) => update({ sales })}
+          valueClassName="text-xl"
+        >
+          {DEPART_OPTIONS.map((t) => (
+            <option key={t} value={t}>
+              {t}
+            </option>
+          ))}
+        </Field>
+        <Field
+          label="Día"
+          value={values.dia}
+          onChange={(dia) => update({ dia: dia as Dia })}
+          valueClassName="text-lg leading-7"
+        >
+          {DIAS.map((d) => (
+            <option key={d.value} value={d.value}>
+              {d.label}
+            </option>
+          ))}
+        </Field>
+      </div>
+      <div className="mt-2">
+        <Field
+          label="¿Puedes llegar antes a la parada?"
+          value={values.antes}
+          onChange={(antes) => update({ antes })}
+          valueClassName="text-lg leading-7"
+        >
+          {EARLIER_OPTIONS.map((m) => (
+            <option key={m} value={m}>
+              {m === "0" ? "No, a mi hora de siempre" : m === "60" ? "Hasta 1 h antes" : `Hasta ${m} min antes`}
+            </option>
+          ))}
+        </Field>
+      </div>
     </div>
   );
 }

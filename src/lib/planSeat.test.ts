@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { corridor } from "../config/corridor";
 import type { DayType, ForecastCell } from "./forecast";
-import { earlierSlots, planSeat } from "./planSeat";
+import { earlierSlots, planSeat, searchWindow } from "./planSeat";
 
 const noData: ForecastCell = {
   n: 0,
@@ -27,10 +27,13 @@ function forecast(dayType: DayType, slot: string): ForecastCell {
   return dayType === "laborable" ? (seed[slot] ?? noData) : noData;
 }
 
-function plan(overrides: { arriveBy?: string; usualDepart?: string; dayType?: DayType } = {}) {
+function plan(
+  overrides: { arriveBy?: string; usualDepart?: string; maxEarlierMin?: number; dayType?: DayType } = {},
+) {
   return planSeat({
     arriveBy: "07:00",
     usualDepart: "04:45",
+    maxEarlierMin: 60,
     dayType: "laborable",
     config: corridor,
     forecast,
@@ -88,6 +91,7 @@ describe("planSeat", () => {
     const result = planSeat({
       arriveBy: "07:00",
       usualDepart: "04:15",
+      maxEarlierMin: 60,
       dayType: "laborable",
       config: corridor,
       forecast: () => cell(30, 0.8, 7, 34, 50),
@@ -99,10 +103,56 @@ describe("planSeat", () => {
     const result = planSeat({
       arriveBy: "07:00",
       usualDepart: "04:45",
+      maxEarlierMin: 60,
       dayType: "laborable",
       config: corridor,
       forecast: (_day, slot) => (slot === "04:30" ? cell(12, 0.7, 10, 33, 90) : forecast("laborable", slot)),
     });
     expect(result.suggestion?.slot).toBe("04:15");
+  });
+
+  // Week 13, Rodolfo: leaving earlier costs sleep he won't give, and letting a bus go makes him late.
+  it("never asks to leave earlier when the rider can't (antes = 0)", () => {
+    const asked: string[] = [];
+    const result = planSeat({
+      arriveBy: "07:00",
+      usualDepart: "04:45",
+      maxEarlierMin: 0,
+      dayType: "laborable",
+      config: corridor,
+      forecast: (day, slot) => {
+        asked.push(slot);
+        return forecast(day, slot);
+      },
+    });
+    expect(result.state).toBe("sin_sugerencia");
+    expect(result.suggestion).toBeNull();
+    expect(asked).toEqual(["04:45"]);
+    expect(result.usual).toMatchObject({ seatOutOf10: 3, arrival: "6:50", onTime: true });
+  });
+
+  it("only searches as far back as the rider allows", () => {
+    expect(plan({ maxEarlierMin: 15 }).suggestion?.slot).toBe("04:30");
+    // 04:30 fails on a bad day; 04:15 would work but is 30 min earlier, past a 15 min limit.
+    const result = planSeat({
+      arriveBy: "07:00",
+      usualDepart: "04:45",
+      maxEarlierMin: 15,
+      dayType: "laborable",
+      config: corridor,
+      forecast: (_day, slot) => (slot === "04:30" ? cell(12, 0.7, 10, 33, 90) : forecast("laborable", slot)),
+    });
+    expect(result.state).toBe("sin_sugerencia");
+  });
+
+  it("caps the rider's limit at the corridor's one hour", () => {
+    expect(searchWindow(120, corridor)).toBe(60);
+    expect(searchWindow(15, corridor)).toBe(15);
+    expect(searchWindow(-15, corridor)).toBe(0);
+  });
+
+  it("shows the bad-day arrival rounded up, never better than it is", () => {
+    // 04:45 + p90 57 + Metro 75 = 6:57 -> 7:00, not 6:55.
+    expect(plan({ maxEarlierMin: 0 }).usual?.badDayArrival).toBe("7:00");
   });
 });
