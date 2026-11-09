@@ -73,7 +73,7 @@ export function PlanInputs({ children, ...initial }: Values & { children?: React
           ))}
         </Field>
         <Field
-          label="Sueles salir"
+          label="En la parada"
           value={values.sales}
           onChange={(sales) => update({ sales })}
           valueClassName="text-xl"

@@ -16,6 +16,13 @@
 - **Pills are 14px, not the 15–16px of the rest of the screen.** At 360px it's the only size where all five fit in one row and "1 h" still gets a 44 × 44 px target.
 - **Week 12 tests now pass `limitMin: 60`,** which is the old behaviour. A new test checks that no limit ever yields a suggestion further back than itself.
 
+### Disclosure for strangers (commit 2)
+- **Banner keeps "DATOS SIMULADOS" and adds a plain sentence under it:** "Ejemplo inventado para probar la app. Aún no son viajes reales." The banner component is shared, so the success screen gets it too.
+- **"llegas al trabajo ~6:50"** stays on one line as a unit, so the time never ends up alone on the next line at 360px.
+- **"(estimado, no medido)" replaces "(estimado de Rodolfo)".** Where the 75 comes from stays in the `corridor.ts` comment.
+- **Field "En la parada" replaces "Sueles salir"**, so the line under the fields now says "Las horas son de cuando ya estás en la parada de la 120, no de cuando sales de tu casa" (no more "horas de salida").
+- **Not changed: "sal a las 4:30" on the suggestion card.** The prompt doesn't ask for it and "Hora de estar en la parada" sits right under it. It's a candidate for the mechanical pass.
+
 ## Tomorrow's first move (Week 13)
 Get the OK on commit 1, then commit 2: the disclosure copy (banner second line, "al trabajo", "estimado, no medido", "En la parada").
 

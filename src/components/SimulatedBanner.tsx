@@ -2,9 +2,12 @@ export function SimulatedBanner() {
   return (
     <div
       role="status"
-      className="bg-[#ffd338] px-4 py-2 text-center text-sm font-bold tracking-widest text-[#2b2300]"
+      className="bg-[#ffd338] px-4 py-2 text-center text-[#2b2300]"
     >
-      DATOS SIMULADOS
+      <p className="text-sm font-bold tracking-widest">DATOS SIMULADOS</p>
+      <p className="text-sm leading-snug">
+        Ejemplo inventado para probar la app. Aún no son viajes reales.
+      </p>
     </div>
   );
 }

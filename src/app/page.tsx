@@ -28,7 +28,8 @@ function SuggestionCard({ suggestion }: { suggestion: NonNullable<Plan["suggesti
         <SeatChance outOf10={suggestion.seatOutOf10} />
       </p>
       <p className="mt-1 text-base">
-        Fila típica {suggestion.p50_wait} min · llegas ~{suggestion.arrival}
+        Fila típica {suggestion.p50_wait} min ·{" "}
+        <span className="whitespace-nowrap">llegas al trabajo ~{suggestion.arrival}</span>
       </p>
     </section>
   );
@@ -44,7 +45,8 @@ function UsualCard({ usual }: { usual: NonNullable<Plan["usual"]> }) {
         <SeatChance outOf10={usual.seatOutOf10} />
       </p>
       <p className="mt-0.5 text-base">
-        Fila típica {usual.p50_wait} min · llegas ~{usual.arrival}
+        Fila típica {usual.p50_wait} min ·{" "}
+        <span className="whitespace-nowrap">llegas al trabajo ~{usual.arrival}</span>
       </p>
     </section>
   );
@@ -96,7 +98,7 @@ export default async function Home({
 
         <PlanInputs {...inputs}>
           <p className="mt-2 text-sm font-semibold text-neutral-700">
-            Las horas de salida son de cuando ya estás en la parada de la 120, no de tu casa.
+            Las horas son de cuando ya estás en la parada de la 120, no de cuando sales de tu casa.
           </p>
         </PlanInputs>
 
@@ -137,7 +139,7 @@ export default async function Home({
         )}
 
         <p className="mt-2 text-center text-sm text-neutral-600">
-          Metro + caminar: {corridor.restOfTripMin} min <em>(estimado de Rodolfo)</em>
+          Metro + caminar: {corridor.restOfTripMin} min <em>(estimado, no medido)</em>
         </p>
 
         <p className="mt-3 mb-4 text-center">
