@@ -43,7 +43,10 @@
 
 ### Persona pass (PACKET §12b)
 - **The stranger persona would change nothing tomorrow**, mainly because the banner says the data is invented. The disclosure works, and it stops the decision. If the real riders say the same, that's the "the answer doesn't change what I do" case from the prompt: a product decision, not a fix.
-- **Three real bugs logged, not fixed yet** (PERSONA_LOG W13 #3, #4, #11): with an early LLEGAR, the no-suggestion message blames seats when the reason is time; "en un día malo" shows even when the typical arrival is late; `/no-contar` drops the rider's choices.
+- **Three real bugs found, fixed before the real sessions** (Nico's call, so sessions aren't spent on known bugs; separate from Fix #1):
+  - `planSeat` now tells *why* there's no suggestion. `seatedButLate` is set when a slot inside the limit seats most riders but misses the arrival on a bad day. The message then says the seats were there and the time is what fails, instead of contradicting the "7 de cada 10" seen a moment earlier.
+  - `usual.typicallyLate` (p50 arrival after LLEGAR) picks the wording: "normalmente llegarías después de…" when even the typical day is late, "en un día malo…" only when just the p90 is. "Normalmente" instead of "la mayoría de las veces", which already means seats on the same screen.
+  - The "No contar las mías" link carries `llegar`, `sales`, `dia` and `limite`; `/no-contar` copies only those four back onto `/`, so opting out keeps the screen. `?t=` and anything else are dropped; the redirect can't leave the site.
 
 ## Tomorrow's first move (Week 13)
 Mechanical pass is complete (11/11). Next: the persona pass (PACKET §12b, a stranger, logged in PERSONA_LOG Week 13) and the five user sessions with `?t=u1`…`u5`. After them, fill `USER_SESSIONS.md` and `PAIN_RANKING.md` and say go for Fix #1 (commit 5, Deploy #2).

@@ -187,3 +187,53 @@ describe("limit helpers", () => {
     expect(formatLimit(60)).toBe("1 h");
   });
 });
+
+describe("why there's no suggestion, and how late (PERSONA_LOG W13 #3, #4)", () => {
+  it("arrive 06:00, limit 15: 04:30 seats most riders but is late even on a typical day", () => {
+    const result = plan({ arriveBy: "06:00", limitMin: 15 });
+    expect(result.state).toBe("sin_sugerencia");
+    expect(result.seatedButLate).toBe("mayoria");
+    expect(result.usual).toMatchObject({ onTime: false, typicallyLate: true, arrival: "6:50" });
+  });
+
+  it("blames seats, not time, when no slot in the limit seats most riders", () => {
+    const result = plan({ usualDepart: "05:00", limitMin: 15 });
+    expect(result.state).toBe("sin_sugerencia");
+    expect(result.seatedButLate).toBeNull();
+  });
+
+  it("says dia_malo when a seated slot is on time on a typical day but not on a bad one", () => {
+    const result = planSeat({
+      arriveBy: "07:00",
+      usualDepart: "04:45",
+      dayType: "laborable",
+      limitMin: 15,
+      config: corridor,
+      // 04:30 seats 8 de cada 10 and typically arrives 6:20, but its bad day ends at 7:20.
+      forecast: (_day, slot) =>
+        slot === "04:30" ? cell(20, 0.8, 5, 30, 110) : forecast("laborable", slot),
+    });
+    expect(result.state).toBe("sin_sugerencia");
+    expect(result.seatedButLate).toBe("dia_malo");
+  });
+
+  it("flags the usual slot as late on a bad day only, not typically", () => {
+    const result = planSeat({
+      arriveBy: "07:00",
+      usualDepart: "04:45",
+      dayType: "laborable",
+      limitMin: 0,
+      config: corridor,
+      forecast: () => cell(20, 0.2, 5, 30, 70), // typical 6:35, bad day 5:55 at El Rosario
+    });
+    expect(result.badDayWarning).toBe(true);
+    expect(result.usual).toMatchObject({ onTime: false, typicallyLate: false });
+  });
+
+  it("is on time and not late for the default rider", () => {
+    const result = plan({ limitMin: 0 });
+    expect(result.badDayWarning).toBe(false);
+    expect(result.usual?.typicallyLate).toBe(false);
+    expect(result.seatedButLate).toBeNull();
+  });
+});

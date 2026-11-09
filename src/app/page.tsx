@@ -128,8 +128,21 @@ export default async function Home({
         )}
         {plan.state === "sin_sugerencia" && (
           <MessageCard>
-            Dentro de tu margen (hasta {formatLimit(inputs.limite)} antes) no hubo una hora en la
-            que la mayoría de las veces se fuera sentado.
+            {plan.seatedButLate === null ? (
+              <>
+                Dentro de tu margen (hasta {formatLimit(inputs.limite)} antes) no hubo una hora en
+                la que la mayoría de las veces se fuera sentado.
+              </>
+            ) : (
+              // Seats were there; the arrival is what fails. Say so, or it contradicts the 7 de cada 10
+              // the rider saw a moment ago with a later LLEGAR (PERSONA_LOG W13 #3).
+              <>
+                Dentro de tu margen (hasta {formatLimit(inputs.limite)} antes) sí hubo horas en que la
+                mayoría de las veces se fue sentado, pero con ellas{" "}
+                {plan.seatedButLate === "mayoria" ? "normalmente" : "en un día malo"} llegarías
+                después de las {formatClock(inputs.llegar)}.
+              </>
+            )}
           </MessageCard>
         )}
         {plan.suggestion && <SuggestionCard suggestion={plan.suggestion} />}
@@ -137,7 +150,10 @@ export default async function Home({
 
         {plan.badDayWarning && (
           <p className="mt-4 rounded-xl border-2 border-[#b45309] bg-[#fef3c7] px-4 py-3 text-base font-semibold text-[#5c2d04]">
-            Ojo: a tu hora, en un día malo, llegarías después de las {inputs.llegar}.
+            {/* "en un día malo" only when the typical day is on time (PERSONA_LOG W13 #4). */}
+            Ojo: a tu hora,{" "}
+            {plan.usual?.typicallyLate ? "normalmente" : "en un día malo"} llegarías
+            después de las {formatClock(inputs.llegar)}.
           </p>
         )}
 
@@ -180,7 +196,10 @@ export default async function Home({
             <>
               Contamos visitas sin nombre ni ubicación para saber si la app sirve ·{" "}
               {/* A plain <a>: <Link> would prefetch the route and opt the rider out by itself. */}
-              <a href="/no-contar" className="inline-block py-2 font-semibold underline">
+              <a
+                href={`/no-contar?${new URLSearchParams({ ...inputs, limite: String(inputs.limite) })}`}
+                className="inline-block py-2 font-semibold underline"
+              >
                 No contar las mías
               </a>
             </>

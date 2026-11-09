@@ -20,15 +20,15 @@ Run on 8 Nov 2026. Fresh chat, no build context. Persona: **a 34-year-old cashie
 |---|---|---|---|---|---|---|
 | 1 | All | "DATOS SIMULADOS. Ejemplo inventado…" | Everything below is fake, so there's nothing to decide | Grave | **Real, and expected.** The disclosure works (she trusts it) and it kills the decision. Real riders in the sessions will meet the same banner | Open: product, not copy |
 | 2 | All | "EN LA PARADA 04:45" | Someone else's time (she's at the stop at 5:00), so every number is for another person | Grave | **Mostly artifact.** On the live page it's a dropdown she can change. Still real that nothing says "pon tu hora" | Open: watch in sessions |
-| 3 | 3 | "no hubo una hora en la que la mayoría de las veces se fuera sentado" | Contradicts screen 2, where 4:30 was 7 de cada 10 | Grave | **Real bug.** With LLEGAR 06:00, 4:30 is still 7 de cada 10 but fails the bad-day arrival check. The message blames seats when the reason is time. Week 12 #4, still open | **Bug** |
-| 4 | 3 | "Ojo: … en un día malo, llegarías después de las 06:00" | The typical arrival (6:50) is already after 6:00, so "un día malo" makes no sense | Grave | **Real bug.** The warning fires when the p90 is late, and says "en un día malo" even when the *typical* arrival is late too. Week 12 #7, still open | **Bug** |
+| 3 | 3 | "no hubo una hora en la que la mayoría de las veces se fuera sentado" | Contradicts screen 2, where 4:30 was 7 de cada 10 | Grave | **Real bug.** With LLEGAR 06:00, 4:30 is still 7 de cada 10 but fails the bad-day arrival check. The message blames seats when the reason is time. Week 12 #4 | **Fixed:** "…sí hubo horas en que la mayoría de las veces se fue sentado, pero con ellas normalmente llegarías después de las 6:00" |
+| 4 | 3 | "Ojo: … en un día malo, llegarías después de las 06:00" | The typical arrival (6:50) is already after 6:00, so "un día malo" makes no sense | Grave | **Real bug.** The warning fires when the p90 is late, and says "en un día malo" even when the *typical* arrival is late too. Week 12 #7 | **Fixed:** "Ojo: a tu hora, normalmente llegarías después de las 6:00"; "en un día malo" only when the typical day is on time |
 | 5 | 3 | (no next step) | Tells her she won't make it but not what to do | Media | Real | Open |
 | 6 | All | "LLEGAR 07:00" | Arrive where? Guessed "al trabajo" from below | Media | Real | Open |
 | 7 | 1 | "3 de cada 10 veces fue sentado" | Who? Other people, she supposes | Media | Real, mild | Open |
 | 8 | 1 | "Necesitas entrar con Google" | Won't hand her account to an unknown site | Media | Real | Open (Week 12 #15) |
 | 9 | 1–4 | "Poco dato · 15 / 12 / 15 / 13 viajes" | Why does the count change on the same route? | Media | Real: the label is the smaller n of the slots shown | Open (Week 12 #6, #9) |
 | 10 | 2 | "en la parada a las 4:30" | 15 min before *their* time, 30 min before hers | Media | Artifact of #2: with her own 5:00, 15 min earlier is 4:45 | — |
-| 11 | 5 | Back to screen 1 with "No puedo" | Opting out erased her choices | Media | **Real bug.** `/no-contar` redirects to `/` and drops the query params | **Bug** |
+| 11 | 5 | Back to screen 1 with "No puedo" | Opting out erased her choices | Media | **Real bug.** `/no-contar` redirects to `/` and drops the query params | **Fixed:** the link carries the 4 plan params and `/no-contar` sends them back (never `?t=`) |
 | 12 | All | "DÍA martes" | Is tomorrow Tuesday? | Leve | Artifact: the live page defaults to tomorrow | — |
 | 13 | All | "sin que te cueste" | Money or effort? Guessed effort | Leve | Real, mild | Open |
 | 14 | 4 | "A tu hora ya sueles ir sentado" | As if it knew her; and nothing about leaving at 4 in the dark | Leve | Real | Open |
@@ -39,15 +39,15 @@ Run on 8 Nov 2026. Fresh chat, no build context. Persona: **a 34-year-old cashie
 | Week 12 | Now |
 |---|---|
 | #1 banner: maybe invented | Understood exactly, and trusted. Now it stops the decision instead (#1) |
-| #4 06:00 message | **Still grave** (#3) |
+| #4 06:00 message | Still grave in the pass (#3), **fixed after it** |
 | #5 trade line read as certain | **Resolved:** read as past odds |
-| #7 "en un día malo" | **Still grave** (#4); it's where she'd close it |
+| #7 "en un día malo" | Still grave in the pass (#4), where she'd close it; **fixed after it** |
 | #8 "estimado de Rodolfo" | **Resolved** |
 | #11 "llegas ~6:30" where? | **Resolved** ("llegas al trabajo"), and helped her decode LLEGAR |
 
 ### Reading it honestly
 
-- **Three real bugs (#3, #4, #11).** #3 and #4 sit on the same screen and are where she closes the app. Real riders who enter an early LLEGAR will hit them.
+- **Three real bugs (#3, #4, #11), all fixed before the real sessions.** #3 and #4 sat on the same screen, where she'd close the app. Not re-tested with the persona.
 - **#1 is the big one, and it isn't a bug.** Honest disclosure of simulated data makes the answer not change what she does. If the real sessions say the same, that's the "the answer doesn't change what I do" case: a product decision, not a fix.
 
 ---

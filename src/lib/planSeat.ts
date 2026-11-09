@@ -8,7 +8,8 @@ export type UsualSlot = {
   seatOutOf10: number;
   p50_wait: number;
   arrival: string;
-  onTime: boolean;
+  onTime: boolean; // on time on a bad day (p90)
+  typicallyLate: boolean; // late even on a typical day (p50): "en un día malo" would be wrong
   n: number;
 };
 
@@ -28,6 +29,10 @@ export type Plan = {
   suggestion: SuggestedSlot | null;
   label: { text: "Buen dato" | "Poco dato" | "Sin dato"; n: number };
   badDayWarning: boolean;
+  // sin_sugerencia only: slots inside the limit did seat most riders, but miss the arrival.
+  // "dia_malo" = at least one is on time on a typical day; "mayoria" = all are late even then
+  // (shown as "normalmente").
+  seatedButLate: "dia_malo" | "mayoria" | null;
   hasSimulated: boolean;
 };
 
@@ -100,8 +105,10 @@ function labelFor(n: number): Plan["label"] {
 export function planSeat({ arriveBy, usualDepart, dayType, limitMin, config, forecast }: PlanInput): Plan {
   const target = toMinutes(arriveBy) - config.restOfTripMin; // must reach El Rosario by this
   const onTime = (slot: string, c: CellWithData) => toMinutes(slot) + c.p90_total <= target;
-  const arrival = (slot: string, c: CellWithData) =>
-    formatClock(toSlot(round5(toMinutes(slot) + c.p50_wait + c.p50_ride + config.restOfTripMin)));
+  const typicalArrival = (slot: string, c: CellWithData) =>
+    toMinutes(slot) + c.p50_wait + c.p50_ride + config.restOfTripMin;
+  const typicallyLate = (slot: string, c: CellWithData) => typicalArrival(slot, c) > toMinutes(arriveBy);
+  const arrival = (slot: string, c: CellWithData) => formatClock(toSlot(round5(typicalArrival(slot, c))));
   const seatOutOf10 = (c: CellWithData) => Math.round(c.seat_rate * 10);
 
   const usualCell = forecast(dayType, usualDepart);
@@ -112,6 +119,7 @@ export function planSeat({ arriveBy, usualDepart, dayType, limitMin, config, for
       suggestion: null,
       label: { text: "Sin dato", n: usualCell.n },
       badDayWarning: false,
+      seatedButLate: null,
       hasSimulated: usualCell.has_simulated,
     };
   }
@@ -123,6 +131,7 @@ export function planSeat({ arriveBy, usualDepart, dayType, limitMin, config, for
     p50_wait: usualCell.p50_wait,
     arrival: arrival(usualDepart, usualCell),
     onTime: usualOnTime,
+    typicallyLate: typicallyLate(usualDepart, usualCell),
     n: usualCell.n,
   };
   const badDayWarning = !usualOnTime;
@@ -134,6 +143,7 @@ export function planSeat({ arriveBy, usualDepart, dayType, limitMin, config, for
       suggestion: null,
       label: labelFor(usualCell.n),
       badDayWarning,
+      seatedButLate: null,
       hasSimulated: usualCell.has_simulated,
     };
   }
@@ -145,32 +155,40 @@ export function planSeat({ arriveBy, usualDepart, dayType, limitMin, config, for
       suggestion: null,
       label: labelFor(usualCell.n),
       badDayWarning,
+      seatedButLate: null,
       hasSimulated: usualCell.has_simulated,
     };
   }
 
   let hasSimulated = usualCell.has_simulated;
+  let seatedButLate: Plan["seatedButLate"] = null;
   for (const slot of earlierSlots(usualDepart, searchWindow(limitMin, config))) {
     const cell = forecast(dayType, slot);
     hasSimulated ||= cell.has_simulated;
-    if (hasData(cell) && cell.seat_rate >= config.seatGoal && onTime(slot, cell)) {
-      return {
-        state: "sugerencia",
-        usual,
-        suggestion: {
-          slot,
-          seatOutOf10: seatOutOf10(cell),
-          p50_wait: cell.p50_wait,
-          arrival: arrival(slot, cell),
-          minutesEarlier: toMinutes(usualDepart) - toMinutes(slot),
-          seatedMin: cell.p50_ride,
-          n: cell.n,
-        },
-        label: labelFor(Math.min(usualCell.n, cell.n)),
-        badDayWarning,
-        hasSimulated,
-      };
+    if (!hasData(cell) || cell.seat_rate < config.seatGoal) continue;
+    if (!onTime(slot, cell)) {
+      if (seatedButLate !== "dia_malo") {
+        seatedButLate = typicallyLate(slot, cell) ? "mayoria" : "dia_malo";
+      }
+      continue;
     }
+    return {
+      state: "sugerencia",
+      usual,
+      suggestion: {
+        slot,
+        seatOutOf10: seatOutOf10(cell),
+        p50_wait: cell.p50_wait,
+        arrival: arrival(slot, cell),
+        minutesEarlier: toMinutes(usualDepart) - toMinutes(slot),
+        seatedMin: cell.p50_ride,
+        n: cell.n,
+      },
+      label: labelFor(Math.min(usualCell.n, cell.n)),
+      badDayWarning,
+      seatedButLate: null,
+      hasSimulated,
+    };
   }
 
   return {
@@ -179,6 +197,7 @@ export function planSeat({ arriveBy, usualDepart, dayType, limitMin, config, for
     suggestion: null,
     label: labelFor(usualCell.n),
     badDayWarning,
+    seatedButLate,
     hasSimulated,
   };
 }
