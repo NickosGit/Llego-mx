@@ -23,8 +23,20 @@
 - **Field "En la parada" replaces "Sueles salir"**, so the line under the fields now says "Las horas son de cuando ya estás en la parada de la 120, no de cuando sales de tu casa" (no more "horas de salida").
 - **Not changed: "sal a las 4:30" on the suggestion card.** The prompt doesn't ask for it and "Hora de estar en la parada" sits right under it. It's a candidate for the mechanical pass.
 
+### Event log (commit 3)
+- **`supabase/events.sql` is the prompt's SQL verbatim, plus a header.** It is committed but NOT applied yet: it waits for Nico's OK, and only on `llego-mx` (ref `ftfjqdjsthsakqqmjivk`).
+- **The RPC runs with an anonymous client (no session cookies)**, so a logged event never carries the rider's Google account, even when signed in.
+- **The insert runs in `after()`,** once the response is sent: the rider never waits on analytics. Cookies and headers are read before it, because Server Components can't read them inside `after()`.
+- **Page still renders when the RPC fails.** Tested locally before the table existed: every view logged `Could not find the function public.log_event…` to the server console and the page was unaffected.
+- **Exactly one `view` per page render.** Each pill or field change is a new render, so it logs a new `view` with the new limit and state. That's how `limits_chosen` gets filled. Prefetches (`next-router-prefetch`) are skipped.
+- **Cookies are set on the request too,** so the very first visit of `/?t=u3` is already logged with its visitor id and tester tag (checked with curl).
+- **`/no-contar` also deletes `llego_vid` and `llego_t`.** Once opted out there's nothing to count with, so the random ids don't need to stay. The middleware skips that path so it can't re-create them in the same response.
+- **The "No contar las mías" link is a plain `<a>`.** A `<Link>` would prefetch the GET route in production and opt every visitor out without them clicking.
+- **The one-time note uses a 60-second `llego_flash` cookie** that the middleware deletes on the next page load: you see "Listo, ya no contamos tus visitas." once, and "No contamos tus visitas." after that. The URL stays clean.
+- **Pure cookie/argument logic lives in `eventCookies.ts`** (no `next/*` imports) so the Edge middleware and vitest both use it.
+
 ## Tomorrow's first move (Week 13)
-Get the OK on commit 1, then commit 2: the disclosure copy (banner second line, "al trabajo", "estimado, no medido", "En la parada").
+Show Nico `supabase/events.sql` and, on his OK, run it on `llego-mx`. Then push (Deploy #1) and run the mechanical pass, PACKET §12a checks 1–11, on production for commit 4.
 
 ## Week 12 — rebuild as venture
 

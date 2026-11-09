@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { logEvent } from "@/lib/events";
 import { getForecastCell } from "@/lib/forecast";
 import { dayTypeOf } from "@/lib/planInputs";
 import { tripSchema } from "@/lib/schemas";
@@ -62,6 +63,8 @@ export async function logTrip(prev: TripFormState, formData: FormData): Promise<
       success: null,
     };
   }
+
+  await logEvent("ride_logged", { day_type: dayType, slot: parsed.data.slot });
 
   const cell = await getForecastCell(dayType, parsed.data.slot);
   return {

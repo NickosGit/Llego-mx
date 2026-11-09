@@ -1,7 +1,10 @@
+import { cookies } from "next/headers";
 import Link from "next/link";
 import { PlanInputs } from "@/components/PlanInputs";
 import { SimulatedBanner } from "@/components/SimulatedBanner";
 import { corridor } from "@/config/corridor";
+import { FLASH_COOKIE, NOCOUNT_COOKIE, isOptedOut } from "@/lib/eventCookies";
+import { logEvent } from "@/lib/events";
 import { getForecastCell, type ForecastCell } from "@/lib/forecast";
 import { dayTypeOf, parsePlanInputs } from "@/lib/planInputs";
 import { earlierSlots, formatClock, formatLimit, planSeat, searchWindow, type Plan } from "@/lib/planSeat";
@@ -87,6 +90,16 @@ export default async function Home({
     forecast: (_day, slot) => cells.get(slot)!,
   });
 
+  await logEvent("view", {
+    day_type: dayType,
+    slot: inputs.sales,
+    limit_min: inputs.limite,
+    state: plan.state,
+  });
+  const jar = await cookies();
+  const optedOut = isOptedOut(jar.get(NOCOUNT_COOKIE)?.value);
+  const justOptedOut = optedOut && jar.has(FLASH_COOKIE);
+
   return (
     <div className="flex min-h-dvh flex-col">
       {plan.hasSimulated && <SimulatedBanner />}
@@ -159,6 +172,22 @@ export default async function Home({
             <span className="block text-sm text-neutral-600">Necesitas entrar con Google</span>
           )}
         </Link>
+
+        <p className="mt-4 text-center text-xs leading-snug text-neutral-600" role="status">
+          {justOptedOut ? (
+            "Listo, ya no contamos tus visitas."
+          ) : optedOut ? (
+            "No contamos tus visitas."
+          ) : (
+            <>
+              Contamos visitas sin nombre ni ubicación para saber si la app sirve ·{" "}
+              {/* A plain <a>: <Link> would prefetch the route and opt the rider out by itself. */}
+              <a href="/no-contar" className="inline-block py-2 font-semibold underline">
+                No contar las mías
+              </a>
+            </>
+          )}
+        </p>
       </main>
     </div>
   );
