@@ -41,6 +41,10 @@
 - **The test browser opts out before testing production,** and curl tests use their own jars, so test rows are few and listed in TEST_LOG to be left out.
 - **Bug fixed: "sal a las" → "en la parada a las"** on the suggestion card (see TEST_LOG).
 
+### Persona pass (PACKET §12b)
+- **The stranger persona would change nothing tomorrow**, mainly because the banner says the data is invented. The disclosure works, and it stops the decision. If the real riders say the same, that's the "the answer doesn't change what I do" case from the prompt: a product decision, not a fix.
+- **Three real bugs logged, not fixed yet** (PERSONA_LOG W13 #3, #4, #11): with an early LLEGAR, the no-suggestion message blames seats when the reason is time; "en un día malo" shows even when the typical arrival is late; `/no-contar` drops the rider's choices.
+
 ## Tomorrow's first move (Week 13)
 Mechanical pass is complete (11/11). Next: the persona pass (PACKET §12b, a stranger, logged in PERSONA_LOG Week 13) and the five user sessions with `?t=u1`…`u5`. After them, fill `USER_SESSIONS.md` and `PAIN_RANKING.md` and say go for Fix #1 (commit 5, Deploy #2).
 
