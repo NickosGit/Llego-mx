@@ -42,7 +42,7 @@
 - **Bug fixed: "sal a las" → "en la parada a las"** on the suggestion card (see TEST_LOG).
 
 ## Tomorrow's first move (Week 13)
-Nico confirms checks 7, 8 and 10 in the SQL editor (queries in the chat / TEST_LOG). Then the persona pass (PACKET §12b) and the five user sessions with `?t=u1`…`u5`.
+Mechanical pass is complete (11/11). Next: the persona pass (PACKET §12b, a stranger, logged in PERSONA_LOG Week 13) and the five user sessions with `?t=u1`…`u5`. After them, fill `USER_SESSIONS.md` and `PAIN_RANKING.md` and say go for Fix #1 (commit 5, Deploy #2).
 
 ## Week 12 — rebuild as venture
 

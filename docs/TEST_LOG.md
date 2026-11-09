@@ -2,7 +2,7 @@
 
 ## Week 13 — mechanical pass (PACKET §12a)
 
-Run on 8 Nov 2026 (≈ 22:55–23:05 Mexico City) against production (https://llego-mx.vercel.app), Deploy #1 at `d8975ea`, at 360px. The test browser opted out first (`/no-contar`) so its visits don't mix with real ones; checks 5, 7 and 8 used curl with fresh cookie jars.
+Run on 8 Nov 2026 (≈ 22:55–23:05 Mexico City) against production (https://llego-mx.vercel.app), Deploy #1 at `d8975ea`, at 360px. **All 11 checks pass**; 7, 8 and 10 were confirmed from Nico's SQL editor screenshots. The test browser opted out first (`/no-contar`) so its visits don't mix with real ones; checks 5, 7 and 8 used curl with fresh cookie jars.
 
 | # | Check | Result | Evidence |
 |---|---|---|---|
@@ -12,10 +12,10 @@ Run on 8 Nov 2026 (≈ 22:55–23:05 Mexico City) against production (https://ll
 | 4 | Limit 60, usual 04:15 | ✅ | "A tu hora ya sueles ir sentado: 8 de cada 10." No suggestion. |
 | 5 | `?limite=999&t=<script>` | ✅ | Falls back to "No puedo", page renders, no script in the DOM. curl: only `llego_vid` is set, no `llego_t`. |
 | 6 | Banner line, "al trabajo", "estimado, no medido" | ✅ | "Ejemplo inventado para probar la app. Aún no son viajes reales." · "llegas al trabajo ~6:50" · "Metro + caminar: 75 min (estimado, no medido)". |
-| 7 | `/?t=u3` → `view` row with `tester = 'u3'`; reload → second row, same `visitor_id` | ⏳ SQL | First response sets `llego_vid` and `llego_t=u3` (Secure, HttpOnly, SameSite=lax, 180 d / 90 d); the reload sets nothing new. Test visitor `7064af4b-ab9a-4950-813e-37e79eb8e8f0`, 04:58:48–49 UTC. Rows to be confirmed in the SQL editor. |
-| 8 | `/no-contar`, then reload → no new rows | ⏳ SQL | Same jar: 307 to `/`, "Listo, ya no contamos tus visitas." once, then "No contamos tus visitas." Two reloads at 04:58:57 UTC that must add no rows. |
+| 7 | `/?t=u3` → `view` row with `tester = 'u3'`; reload → second row, same `visitor_id` | ✅ | First response sets `llego_vid` and `llego_t=u3` (Secure, HttpOnly, SameSite=lax, 180 d / 90 d); the reload sets nothing new. SQL editor, that visitor id: exactly two rows, `view · u3 · 04:58:48.890 UTC` and `view · u3 · 04:58:49.457 UTC`. |
+| 8 | `/no-contar`, then reload → no new rows | ✅ | Same jar: 307 to `/`, "Listo, ya no contamos tus visitas." once, then "No contamos tus visitas." The two reloads at 04:58:57 UTC added no rows: the same query still returns only the two rows of check 7. |
 | 9 | Anon: select → 0 rows; direct insert → rejected; `log_event('hack', …)` → rejected | ✅ | REST with the publishable key: `events` select `[]`; insert → 42501 "new row violates row-level security policy"; `log_event` with `p_name = 'hack'` → 23514 `events_name_check`; `trips` select `[]`. |
-| 10 | Log a ride → one `ride_logged` row; no `user_id` column in `events` | ⏳ Nico | Needs a Google sign-in. `events.sql` (applied verbatim) has no `user_id`, IP, user agent or location column; PostgREST doesn't publish the table's schema to anon. |
+| 10 | Log a ride → one `ride_logged` row; no `user_id` column in `events` | ✅ | Nico signed in with Google and logged a ride: exactly one row, `ride_logged · laborable · 04:45:00 · 2026-11-09 05:05:02 UTC` (SQL editor screenshot), no tester or limit on it. `information_schema.columns` lists exactly 9 columns: `id, visitor_id, tester, name, day_type, slot, limit_min, state, created_at`. No `user_id`, IP, user agent or location. |
 | 11 | Secrets grep | ✅ | `git grep -nE "service_role\|sb_secret\|eyJhbGci" -- ":!docs"` → nothing. |
 
 Test rows that are not real riders, to leave out of `returning.sql` counts: visitor `7064af4b-ab9a-4950-813e-37e79eb8e8f0` (tester u3, check 7) and visitor `cdb36a21-c1e3-4808-9743-57165b96a80d` (check 5). Earlier, the local check of the empty table also confirmed the page renders while `log_event` doesn't exist yet: each view only printed "Could not find the function public.log_event…" to the server log.
