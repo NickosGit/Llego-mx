@@ -18,7 +18,9 @@ Run on 8 Nov 2026 (≈ 22:55–23:05 Mexico City) against production (https://ll
 | 10 | Log a ride → one `ride_logged` row; no `user_id` column in `events` | ✅ | Nico signed in with Google and logged a ride: exactly one row, `ride_logged · laborable · 04:45:00 · 2026-11-09 05:05:02 UTC` (SQL editor screenshot), no tester or limit on it. `information_schema.columns` lists exactly 9 columns: `id, visitor_id, tester, name, day_type, slot, limit_min, state, created_at`. No `user_id`, IP, user agent or location. |
 | 11 | Secrets grep | ✅ | `git grep -nE "service_role\|sb_secret\|eyJhbGci" -- ":!docs"` → nothing. |
 
-Test rows that are not real riders, to leave out of `returning.sql` counts: visitor `7064af4b-ab9a-4950-813e-37e79eb8e8f0` (tester u3, check 7) and visitor `cdb36a21-c1e3-4808-9743-57165b96a80d` (check 5). Earlier, the local check of the empty table also confirmed the page renders while `log_event` doesn't exist yet: each view only printed "Could not find the function public.log_event…" to the server log.
+Test rows that are not real riders, to leave out of `returning.sql` counts: visitor `7064af4b-ab9a-4950-813e-37e79eb8e8f0` (tester u3, check 7) and visitor `cdb36a21-c1e3-4808-9743-57165b96a80d` (check 5). Also not real riders: the demo recording (`entrega-w13/DEMO_NicolasMartinez.mp4`) was recorded twice against production on 9 Nov 2026 between 05:31 and 05:37 UTC. Each run was a fresh visitor with no tester tag, about 5 `view` rows, ending at `/no-contar`, which deleted its id, so the ids aren't known. Both runs fall on a single day, so `returning.sql` doesn't count them as returning. The screenshots in `docs/evidence/w13-*.png` came from a browser that opted out first and added no rows.
+
+Earlier, the local check of the empty table also confirmed the page renders while `log_event` doesn't exist yet: each view only printed "Could not find the function public.log_event…" to the server log.
 
 ### Bug found and fixed
 
