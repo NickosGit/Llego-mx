@@ -35,8 +35,14 @@
 - **The one-time note uses a 60-second `llego_flash` cookie** that the middleware deletes on the next page load: you see "Listo, ya no contamos tus visitas." once, and "No contamos tus visitas." after that. The URL stays clean.
 - **Pure cookie/argument logic lives in `eventCookies.ts`** (no `next/*` imports) so the Edge middleware and vitest both use it.
 
+### Deploy #1 and the mechanical pass (commit 4)
+- **`events.sql` applied by Nico on `llego-mx`, 8 Nov 2026.** Anon checks right after: select `[]`, direct insert 42501, `log_event('hack')` 23514.
+- **Nico's own commit `f968169` was already on GitHub** with the PACKET, the prompt and his `USER_SESSIONS.md` / `PAIN_RANKING.md` templates. His templates were kept and my local templates commit was dropped; the three code commits were replayed on top unchanged.
+- **The test browser opts out before testing production,** and curl tests use their own jars, so test rows are few and listed in TEST_LOG to be left out.
+- **Bug fixed: "sal a las" → "en la parada a las"** on the suggestion card (see TEST_LOG).
+
 ## Tomorrow's first move (Week 13)
-Show Nico `supabase/events.sql` and, on his OK, run it on `llego-mx`. Then push (Deploy #1) and run the mechanical pass, PACKET §12a checks 1–11, on production for commit 4.
+Nico confirms checks 7, 8 and 10 in the SQL editor (queries in the chat / TEST_LOG). Then the persona pass (PACKET §12b) and the five user sessions with `?t=u1`…`u5`.
 
 ## Week 12 — rebuild as venture
 

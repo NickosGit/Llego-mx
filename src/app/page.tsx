@@ -22,11 +22,9 @@ function SuggestionCard({ suggestion }: { suggestion: NonNullable<Plan["suggesti
   return (
     <section className="mt-4 rounded-2xl bg-[#1f7a4a] px-5 py-4 text-white">
       <h2 className="text-sm font-bold tracking-wider uppercase">Para ir sentado</h2>
-      <p className="mt-1 flex items-baseline gap-3 text-2xl font-semibold">
-        sal a las
-        <span className="text-6xl font-black tracking-tight">{formatClock(suggestion.slot)}</span>
-      </p>
-      <p className="mt-1 text-base font-semibold">Hora de estar en la parada</p>
+      {/* The slot is the time at the stop, not leaving home: never "sal a las" (TEST_LOG W13). */}
+      <p className="mt-1 text-2xl font-semibold">en la parada a las</p>
+      <p className="text-6xl font-black tracking-tight">{formatClock(suggestion.slot)}</p>
       <p className="mt-2 text-lg">
         <SeatChance outOf10={suggestion.seatOutOf10} />
       </p>
