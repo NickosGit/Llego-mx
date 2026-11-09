@@ -6,7 +6,7 @@ const sundayNight = new Date("2026-11-02T04:00:00Z");
 
 describe("parsePlanInputs", () => {
   it("uses the defaults and tomorrow when there are no params", () => {
-    expect(parsePlanInputs({}, sundayNight)).toEqual({ llegar: "07:00", sales: "04:45", dia: "lunes" });
+    expect(parsePlanInputs({}, sundayNight)).toEqual({ llegar: "07:00", sales: "04:45", dia: "lunes", limite: 0 });
   });
 
   it("reads valid params", () => {
@@ -14,6 +14,7 @@ describe("parsePlanInputs", () => {
       llegar: "06:00",
       sales: "04:15",
       dia: "sabado",
+      limite: 0,
     });
   });
 
@@ -22,7 +23,19 @@ describe("parsePlanInputs", () => {
       llegar: "07:00",
       sales: "04:45",
       dia: "lunes",
+      limite: 0,
     });
+  });
+
+  it("reads the rider's limit and falls back to No puedo (0)", () => {
+    const limite = (value?: string | string[]) =>
+      parsePlanInputs(value === undefined ? {} : { limite: value }, sundayNight).limite;
+    expect(limite()).toBe(0);
+    expect(limite("999")).toBe(0);
+    expect(limite("abc")).toBe(0);
+    expect(limite(["15", "30"])).toBe(0);
+    expect(limite("30")).toBe(30);
+    expect(limite("60")).toBe(60);
   });
 });
 

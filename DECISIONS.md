@@ -1,5 +1,24 @@
 # DECISIONS — ¿Llego?
 
+## Week 13 — the rider's limit, real users, event log
+
+### Why (Nov 2026)
+- **Rodolfo took back his Week 12 "yes".** Leaving earlier costs him sleep (bed 10 pm, up 4:15), and he can't let a full bus pass. His slack is zero both ways, so the Week 12 card was pressure to lose sleep.
+- **Blueprint T4 declaration:** honor each rider's chosen limit, test the slack hypothesis with four more riders, disclose simulated or thin data (conditions 2, 4, 6).
+- **Slack verdict rule, written before the data:** the seat idea survives only if ≥ 2 of the 4 other riders say they could be at the stop 15+ min earlier at no cost to sleep or lateness **and** have already come early or let a bus pass for a seat.
+
+### Rider limit (commit 1)
+- **`limite` query param, 0 / 15 / 30 / 45 / 60, default 0 ("No puedo").** Anything else, including a repeated param, falls back to 0. It stays in the URL, never the DB.
+- **The search window is `min(limite, searchWindowMin)`,** shared by `planSeat` and the page through `searchWindow()`. With 0 the page reads only the rider's own slot, so no earlier slot is fetched or able to leak onto the screen.
+- **`sin_margen` comes after `ya_sentado`:** a rider who already sits still hears so with limit 0. `sin_dato` still wins over both.
+- **The bad-day warning still shows in `sin_margen`.** It names the arrival time, not an earlier departure, so it doesn't break "no earlier time anywhere".
+- **Trade line drops the sleep framing:** "Si estás en la parada N min antes: X de cada 10 … contra Y de cada 10 a tu hora", only in `sugerencia`.
+- **Pills are 14px, not the 15–16px of the rest of the screen.** At 360px it's the only size where all five fit in one row and "1 h" still gets a 44 × 44 px target.
+- **Week 12 tests now pass `limitMin: 60`,** which is the old behaviour. A new test checks that no limit ever yields a suggestion further back than itself.
+
+## Tomorrow's first move (Week 13)
+Get the OK on commit 1, then commit 2: the disclosure copy (banner second line, "al trabajo", "estimado, no medido", "En la parada").
+
 ## Week 12 — rebuild as venture
 
 ### The pivot (1 Nov 2026)

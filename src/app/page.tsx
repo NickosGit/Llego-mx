@@ -4,7 +4,7 @@ import { SimulatedBanner } from "@/components/SimulatedBanner";
 import { corridor } from "@/config/corridor";
 import { getForecastCell, type ForecastCell } from "@/lib/forecast";
 import { dayTypeOf, parsePlanInputs } from "@/lib/planInputs";
-import { earlierSlots, formatClock, planSeat, type Plan } from "@/lib/planSeat";
+import { earlierSlots, formatClock, formatLimit, planSeat, searchWindow, type Plan } from "@/lib/planSeat";
 import { getCurrentUser } from "@/lib/supabase/server";
 
 function SeatChance({ outOf10 }: { outOf10: number }) {
@@ -66,7 +66,8 @@ export default async function Home({
   const inputs = parsePlanInputs(await searchParams, new Date());
   const dayType = dayTypeOf(inputs.dia);
 
-  const slots = [inputs.sales, ...earlierSlots(inputs.sales, corridor.searchWindowMin)];
+  // Only read slots inside the rider's limit: with "No puedo", just their own.
+  const slots = [inputs.sales, ...earlierSlots(inputs.sales, searchWindow(inputs.limite, corridor))];
   const cells = new Map<string, ForecastCell>(
     await Promise.all(
       slots.map(async (slot) => [slot, await getForecastCell(dayType, slot)] as const),
@@ -79,6 +80,7 @@ export default async function Home({
     arriveBy: inputs.llegar,
     usualDepart: inputs.sales,
     dayType,
+    limitMin: inputs.limite,
     config: corridor,
     forecast: (_day, slot) => cells.get(slot)!,
   });
@@ -92,10 +94,11 @@ export default async function Home({
           {corridor.route} · Las Alamedas → El Rosario
         </p>
 
-        <PlanInputs {...inputs} />
-        <p className="mt-2 text-sm font-semibold text-neutral-700">
-          Las horas de salida son de cuando ya estás en la parada de la 120, no de tu casa.
-        </p>
+        <PlanInputs {...inputs}>
+          <p className="mt-2 text-sm font-semibold text-neutral-700">
+            Las horas de salida son de cuando ya estás en la parada de la 120, no de tu casa.
+          </p>
+        </PlanInputs>
 
         {plan.state === "sin_dato" && (
           <MessageCard>
@@ -107,10 +110,13 @@ export default async function Home({
             A tu hora ya sueles ir sentado: {plan.usual.seatOutOf10} de cada 10.
           </MessageCard>
         )}
+        {plan.state === "sin_margen" && (
+          <MessageCard>Respetamos tu hora. No te vamos a pedir salir antes.</MessageCard>
+        )}
         {plan.state === "sin_sugerencia" && (
           <MessageCard>
-            No encontramos una hora, hasta 1 h antes, en la que la mayoría de las veces se vaya
-            sentado.
+            Dentro de tu margen (hasta {formatLimit(inputs.limite)} antes) no hubo una hora en la
+            que la mayoría de las veces se fuera sentado.
           </MessageCard>
         )}
         {plan.suggestion && <SuggestionCard suggestion={plan.suggestion} />}
@@ -122,11 +128,11 @@ export default async function Home({
           </p>
         )}
 
-        {plan.suggestion && (
+        {plan.state === "sugerencia" && plan.suggestion && plan.usual && (
           <p className="mt-4 text-center text-lg leading-snug">
-            Cambias <strong>{plan.suggestion.minutesEarlier} min de sueño</strong>
-            <br />
-            por <strong>~{plan.suggestion.seatedMin} min sentado</strong> en la 120
+            Si estás en la parada {plan.suggestion.minutesEarlier} min antes:{" "}
+            <strong>{plan.suggestion.seatOutOf10} de cada 10</strong> veces fue sentado, contra{" "}
+            <strong>{plan.usual.seatOutOf10} de cada 10</strong> a tu hora.
           </p>
         )}
 

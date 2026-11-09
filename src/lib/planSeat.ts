@@ -1,7 +1,7 @@
 import type { corridor } from "@/config/corridor";
 import type { DayType, ForecastCell } from "@/lib/forecast";
 
-export type PlanState = "sin_dato" | "ya_sentado" | "sugerencia" | "sin_sugerencia";
+export type PlanState = "sin_dato" | "ya_sentado" | "sin_margen" | "sugerencia" | "sin_sugerencia";
 
 export type UsualSlot = {
   slot: string;
@@ -35,6 +35,7 @@ type PlanInput = {
   arriveBy: string;
   usualDepart: string;
   dayType: DayType;
+  limitMin: number; // how much earlier the rider says they could be at the stop; 0 = "No puedo antes"
   config: typeof corridor;
   forecast: (dayType: DayType, slot: string) => ForecastCell;
 };
@@ -82,11 +83,21 @@ export function earlierSlots(usualDepart: string, searchWindowMin: number): stri
   return slots;
 }
 
+// The rider's limit is law: never search past it, and never past the corridor's own cap.
+export function searchWindow(limitMin: number, config: Pick<typeof corridor, "searchWindowMin">): number {
+  return Math.min(limitMin, config.searchWindowMin);
+}
+
+// 60 -> "1 h", 15 -> "15 min"
+export function formatLimit(limitMin: number): string {
+  return limitMin === 60 ? "1 h" : `${limitMin} min`;
+}
+
 function labelFor(n: number): Plan["label"] {
   return { text: n >= 30 ? "Buen dato" : "Poco dato", n };
 }
 
-export function planSeat({ arriveBy, usualDepart, dayType, config, forecast }: PlanInput): Plan {
+export function planSeat({ arriveBy, usualDepart, dayType, limitMin, config, forecast }: PlanInput): Plan {
   const target = toMinutes(arriveBy) - config.restOfTripMin; // must reach El Rosario by this
   const onTime = (slot: string, c: CellWithData) => toMinutes(slot) + c.p90_total <= target;
   const arrival = (slot: string, c: CellWithData) =>
@@ -127,8 +138,19 @@ export function planSeat({ arriveBy, usualDepart, dayType, config, forecast }: P
     };
   }
 
+  if (limitMin === 0) {
+    return {
+      state: "sin_margen",
+      usual,
+      suggestion: null,
+      label: labelFor(usualCell.n),
+      badDayWarning,
+      hasSimulated: usualCell.has_simulated,
+    };
+  }
+
   let hasSimulated = usualCell.has_simulated;
-  for (const slot of earlierSlots(usualDepart, config.searchWindowMin)) {
+  for (const slot of earlierSlots(usualDepart, searchWindow(limitMin, config))) {
     const cell = forecast(dayType, slot);
     hasSimulated ||= cell.has_simulated;
     if (hasData(cell) && cell.seat_rate >= config.seatGoal && onTime(slot, cell)) {

@@ -24,6 +24,10 @@ function quarterHours(from: string, to: string): string[] {
   return slots;
 }
 
+// Minutes earlier the rider could be at the stop. 0 = "No puedo antes", the default.
+export const LIMIT_OPTIONS = [0, 15, 30, 45, 60] as const;
+export type Limite = (typeof LIMIT_OPTIONS)[number];
+
 export const ARRIVE_OPTIONS = quarterHours("05:00", "12:00");
 export const DEPART_OPTIONS = quarterHours("03:00", "11:45");
 
@@ -66,6 +70,10 @@ export function parsePlanInputs(
       llegar: oneOf(ARRIVE_OPTIONS, corridor.defaults.arriveBy),
       sales: oneOf(DEPART_OPTIONS, corridor.defaults.usualDepart),
       dia: z.enum(DIAS.map((d) => d.value) as [Dia, ...Dia[]]).catch(tomorrowDia(now)),
+      limite: z
+        .enum(LIMIT_OPTIONS.map(String) as [string, ...string[]])
+        .transform((v) => Number(v) as Limite)
+        .catch(0 as Limite),
     })
     .parse(params);
 }
